@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  RRuleSet.swift
 //
 //
 //  Created by Gregory Fajen on 3/5/22.
@@ -8,6 +8,7 @@
 import Foundation
 
 struct RRuleSet {
+
     let start: DTStart
     let rule: RRule
 
@@ -35,9 +36,11 @@ struct RRuleSet {
     var serialized: String {
         start.serialized + "\n" + rule.serialized
     }
+
 }
 
 extension Array where Element == Option {
+
     init(rfcString: String) throws {
         func parseLine(rfcString: String) throws -> Option {
             switch try RRuleSet.Property(line: rfcString) {
@@ -58,9 +61,11 @@ extension Array where Element == Option {
             .filter { !$0.isEmpty }
             .map(parseLine)
     }
+
 }
 
 extension RRuleSet.Property {
+
     init(line: String) throws {
         let line = line.uppercased()
 
@@ -73,4 +78,5 @@ extension RRuleSet.Property {
 
         throw RRuleError.unrecognizedProperty
     }
+
 }

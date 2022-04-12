@@ -70,6 +70,7 @@ extension RRule {
 }
 
 extension RRule.Attribute {
+
     init(_ string: String) throws {
         let components = string.components(separatedBy: "=")
         guard components.count == 2,
@@ -121,11 +122,13 @@ extension RRule.Attribute {
                 self = .byxx(byxx, values)
         }
     }
+
 }
 
 // MARK: - Serialization
 
 extension RRule.Attribute {
+
     var key: String {
         switch self {
             case .frequency:
@@ -171,4 +174,5 @@ extension RRule.Attribute {
     var serialized: String {
         "\(key)=\(serializedValue)"
     }
+
 }

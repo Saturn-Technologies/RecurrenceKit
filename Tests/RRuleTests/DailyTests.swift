@@ -5,7 +5,7 @@
 //  Created by Gregory Fajen on 3/5/22.
 //
 
-@testable import RRule
+@testable import RecurrenceKit
 import XCTest
 
 final class DailyTests: XCTestCase, RRuleTester {

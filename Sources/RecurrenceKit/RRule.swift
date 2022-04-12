@@ -31,6 +31,10 @@ public struct RRule: Option {
             attributes.append(.until(until))
         }
 
+        if let byWeekday = byweekday {
+            attributes.append(.byday(byWeekday))
+        }
+
         return attributes
     }
 
@@ -54,7 +58,7 @@ public struct RRule: Option {
     var byminute: [Int]?
     var bysecond: [Int]?
 
-    public init(starting: DateComponents,
+    public init(starting dtStart: DTStart,
                 frequency: Frequency? = nil,
                 interval: Int = 1,
                 byMonth: [Units.Month.Name]? = nil,
@@ -68,7 +72,7 @@ public struct RRule: Option {
                 bySecond: [Int]? = nil,
                 count: Int? = nil,
                 until: DateComponents? = nil) {
-        dtStart = DTStart(components: starting)
+        self.dtStart = dtStart
         self.frequency = frequency
         self.interval = interval
         self.count = count
@@ -84,8 +88,7 @@ public struct RRule: Option {
         byminute = byMinute
         bysecond = bySecond
 
-        if let dtStart = dtStart,
-           byweekno == nil,
+        if byweekno == nil,
            byyearday == nil,
            bymonthday == nil,
            byweekday == nil,
@@ -108,22 +111,36 @@ public struct RRule: Option {
                     break
             }
         }
+    }
 
-        ////        if bywee
-        //            (byweekno is None and byyearday is None and bymonthday is None and
-        //            byweekday is None and byeaster is None):
-        //                if freq == YEARLY:
-        //                if bymonth is None:
-        //                bymonth = dtstart.month
-        //            self._original_rule['bymonth'] = None
-        //            bymonthday = dtstart.day
-        //            self._original_rule['bymonthday'] = None
-        //            elif freq == MONTHLY:
-        //                bymonthday = dtstart.day
-        //            self._original_rule['bymonthday'] = None
-        //            elif freq == WEEKLY:
-        //                byweekday = dtstart.weekday()
-        //            self._original_rule['byweekday'] = None
+    public init(starting components: DateComponents,
+                frequency: Frequency? = nil,
+                interval: Int = 1,
+                byMonth: [Units.Month.Name]? = nil,
+                byDayOfMonth: [Int]? = nil,
+                byWeekday: [Weekday]? = nil,
+                byNWeekday: [NWeekday]? = nil,
+                byYearDay: [Int]? = nil,
+                byWeekNo: [Int]? = nil,
+                byHour: [Int]? = nil,
+                byMinute: [Int]? = nil,
+                bySecond: [Int]? = nil,
+                count: Int? = nil,
+                until: DateComponents? = nil) {
+        self.init(starting: DTStart(components: components),
+                  frequency: frequency,
+                  interval: interval,
+                  byMonth: byMonth,
+                  byDayOfMonth: byDayOfMonth,
+                  byWeekday: byWeekday,
+                  byNWeekday: byNWeekday,
+                  byYearDay: byYearDay,
+                  byWeekNo: byWeekNo,
+                  byHour: byHour,
+                  byMinute: byMinute,
+                  bySecond: bySecond,
+                  count: count,
+                  until: until)
     }
 
     init(_ attributes: Attribute...) {
@@ -287,8 +304,10 @@ public struct RRule: Option {
  }
  */
 
-extension RRule {
+public extension RRule {
+
     var serialized: String {
         "RRULE:" + attributes.map(\.serialized).joined(separator: ";")
     }
+
 }

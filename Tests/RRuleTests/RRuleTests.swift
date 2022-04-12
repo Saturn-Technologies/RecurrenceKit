@@ -1,4 +1,4 @@
-@testable import RRule
+@testable import RecurrenceKit
 import XCTest
 
 final class RRuleTests: XCTestCase {

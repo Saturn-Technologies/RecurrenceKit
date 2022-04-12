@@ -1,5 +1,5 @@
 //
-//  File 2.swift
+//  RRule+DaySequences.swift
 //
 //
 //  Created by Gregory Fajen on 3/6/22.

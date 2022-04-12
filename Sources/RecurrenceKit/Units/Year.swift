@@ -123,7 +123,7 @@ public extension Units {
                 ordinality -= numberOfDays
             }
 
-            fatalError()
+            fatalError("day not found")
         }
 
         func firstDay(of week: Int) -> Day {

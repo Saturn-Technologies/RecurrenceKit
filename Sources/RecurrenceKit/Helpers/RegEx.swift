@@ -8,6 +8,7 @@
 import Foundation
 
 struct RegEx {
+
     let expression: NSRegularExpression
 
     init(_ pattern: String,
@@ -16,8 +17,7 @@ struct RegEx {
     }
 
     func match(for string: String,
-               options: NSRegularExpression.MatchingOptions = []) -> Match?
-    {
+               options: NSRegularExpression.MatchingOptions = []) -> Match? {
         expression
             .firstMatch(in: string,
                         options: options,
@@ -32,8 +32,7 @@ struct RegEx {
     }
 
     func rangeOfFirstMatch(in string: String,
-                           options: NSRegularExpression.MatchingOptions = []) -> Range<String.Index>?
-    {
+                           options: NSRegularExpression.MatchingOptions = []) -> Range<String.Index>? {
         let range = expression.rangeOfFirstMatch(in: string,
                                                  options: options,
                                                  range: rangeOfEntireString(string))
@@ -45,8 +44,7 @@ struct RegEx {
         let captureGroups: [String?]
 
         init(_ string: String,
-             _ result: NSTextCheckingResult)
-        {
+             _ result: NSTextCheckingResult) {
             func stringAtIndex(_ i: Int) -> String? {
                 let range = Range(result.range(at: i), in: string)
                 return range.map {
@@ -58,14 +56,16 @@ struct RegEx {
             captureGroups = (1 ..< result.numberOfRanges).map(stringAtIndex)
         }
     }
+
 }
 
 extension String {
+
     func replacingOccurrences(of regex: RegEx,
                               with substitution: String,
-                              options _: NSRegularExpression.MatchingOptions = []) -> String
-    {
+                              options _: NSRegularExpression.MatchingOptions = []) -> String {
         guard let range = regex.rangeOfFirstMatch(in: self) else { return self }
         return replacingCharacters(in: range, with: substitution)
     }
+
 }

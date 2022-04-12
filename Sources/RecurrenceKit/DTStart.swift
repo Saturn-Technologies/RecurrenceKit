@@ -7,14 +7,14 @@
 
 import Foundation
 
-struct DTStart: Option {
+public struct DTStart: Option {
 
-    let components: DateComponents
+    public let components: DateComponents
 
-    var timeZone: TimeZone? { components.timeZone }
-    var timeZoneID: String? { timeZone?.identifier }
+    public var timeZone: TimeZone? { components.timeZone }
+    public var timeZoneID: String? { timeZone?.identifier }
 
-    var calendar: Calendar {
+    public var calendar: Calendar {
         var calendar = Calendar(identifier: .gregorian)
         if let timeZone = timeZone {
             calendar.timeZone = timeZone
@@ -22,16 +22,16 @@ struct DTStart: Option {
         return calendar
     }
 
-    var date: Date {
+    public var date: Date {
         get { calendar.date(from: components)! }
         set { self = DTStart(date: newValue, timeZone: timeZone) }
     }
 
-    init(components: DateComponents) {
+    public init(components: DateComponents) {
         self.components = components
     }
 
-    init(date: Date, timeZone: TimeZone? = nil) {
+    public init(date: Date, timeZone: TimeZone? = nil) {
         var calendar = Calendar(identifier: .gregorian)
         if let timeZone = timeZone {
             calendar.timeZone = timeZone
@@ -47,13 +47,13 @@ struct DTStart: Option {
                                              from: date)
     }
 
-    var weekday: RRule.Weekday {
+    public var weekday: RRule.Weekday {
         let i = calendar.component(.weekday, from: date) - calendar.firstWeekday
         return RRule.Weekday.allCases[i]
     }
 
     init(rfcString: String) throws {
-        let regex = try! RegEx("DTSTART(?:;TZID=([^:=]*))?(?::|=)([^;\\s]+)")
+        let regex = try RegEx("DTSTART(?:;TZID=([^:=]*))?(?::|=)([^;\\s]+)")
         guard let match = regex.match(for: rfcString) else {
             throw NSError()
         }
@@ -70,8 +70,7 @@ struct DTStart: Option {
             }
 
             if components.timeZone != nil,
-               timeZone.identifier != "GMT"
-            {
+               timeZone.identifier != "GMT" {
                 throw NSError()
             }
 
@@ -81,7 +80,7 @@ struct DTStart: Option {
         self = DTStart(components: components)
     }
 
-    var serialized: String {
+    public var serialized: String {
         if let timeZoneID = timeZoneID, timeZoneID != "GMT" {
             return "DTSTART;TZID=\(timeZoneID):\(components.serialized)"
         } else {
@@ -89,28 +88,38 @@ struct DTStart: Option {
         }
     }
 
-    var year: Int {
+    public var year: Int {
         calendar.component(.year, from: date)
     }
 
-    var month: Int {
+    public var month: Int {
         calendar.component(.month, from: date)
     }
 
-    var day: Int {
+    public var day: Int {
         calendar.component(.day, from: date)
     }
 
-    var hour: Int {
+    public var hour: Int {
         calendar.component(.hour, from: date)
     }
 
-    var minute: Int {
+    public var minute: Int {
         calendar.component(.minute, from: date)
     }
 
-    var second: Int {
+    public var second: Int {
         calendar.component(.second, from: date)
+    }
+
+}
+
+extension DTStart {
+
+    typealias Tuple = (year: Int, month: Int, day: Int, hour: Int, minute: Int, second: Int)
+
+    var tuple: Tuple {
+        (components.year ?? 0, components.month ?? 0, components.day ?? 0, components.hour ?? 0, components.minute ?? 0, components.second ?? 0)
     }
 
 }

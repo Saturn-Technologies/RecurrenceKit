@@ -1,6 +1,5 @@
-
 //
-//  File.swift
+//  RRule+TimeSequences.swift
 //
 //
 //  Created by Gregory Fajen on 3/6/22.

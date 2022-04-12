@@ -5,13 +5,13 @@ import PackageDescription
 
 let package = Package(
 
-    name: "RRule",
+    name: "RecurrenceKit",
 
     products: [
 
         .library(
-            name: "RRule",
-            targets: ["RRule"]
+            name: "RecurrenceKit",
+            targets: ["RecurrenceKit"]
         ),
 
         .executable(
@@ -32,7 +32,7 @@ let package = Package(
     targets: [
 
         .target(
-            name: "RRule",
+            name: "RecurrenceKit",
             dependencies: [
 
             ]
@@ -41,14 +41,14 @@ let package = Package(
         .executableTarget(
             name: "Run",
             dependencies: [
-                "RRule"
+                "RecurrenceKit"
             ]
         ),
 
         .testTarget(
             name: "RRuleTests",
             dependencies: [
-                "RRule",
+                "RecurrenceKit",
                 "SnapshotTesting"
             ]
         ),

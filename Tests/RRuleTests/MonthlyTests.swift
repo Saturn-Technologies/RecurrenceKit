@@ -5,7 +5,7 @@
 //  Created by Gregory Fajen on 3/5/22.
 //
 
-@testable import RRule
+@testable import RecurrenceKit
 @testable import SnapshotTesting
 import XCTest
 
@@ -32,7 +32,9 @@ extension RRuleTester {
                 file _: StaticString = #file,
                 testName _: String = #function,
                 line _: UInt = #line) {
-        let result = rrule.all()
+        let result = rrule
+            .dateComponents()
+            .asArray
 
         if result == expectation {
             return

@@ -5,6 +5,8 @@
 //  Created by Gregory Fajen on 3/6/22.
 //
 
+// swiftlint:disable all
+
 import Foundation
 
 public extension Units {
@@ -124,8 +126,12 @@ extension Units.Day {
                        day: day)
     }
 
-    func components(with hour: Int, _ minute: Int, _ second: Int) -> DateComponents {
-        DateComponents(year: year.year,
+    func components(with hour: Int,
+                    _ minute: Int,
+                    _ second: Int,
+                    timeZone: TimeZone? = nil) -> DateComponents {
+        DateComponents(timeZone: timeZone,
+                       year: year.year,
                        month: month.month.rawValue,
                        day: day,
                        hour: hour,

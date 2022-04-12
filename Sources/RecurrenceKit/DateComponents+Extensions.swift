@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  DateComponents+Extension.swift
 //
 //
 //  Created by Gregory Fajen on 3/5/22.
@@ -8,6 +8,7 @@
 import Foundation
 
 extension DateComponents {
+
     init(rfcString: String) throws {
         let regex = try RegEx("^(\\d{4})(\\d{2})(\\d{2})(T(\\d{2})(\\d{2})(\\d{2})(Z?))?")
         guard let match = regex.match(for: rfcString) else {
@@ -66,4 +67,5 @@ extension DateComponents {
             return date
         }
     }
+
 }

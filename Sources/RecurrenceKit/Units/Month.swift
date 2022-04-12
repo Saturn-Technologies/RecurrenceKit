@@ -5,6 +5,8 @@
 //  Created by Gregory Fajen on 3/6/22.
 //
 
+// swiftlint:disable all
+
 import Foundation
 
 public extension Units {
@@ -70,8 +72,6 @@ public extension Units {
         }
 
         var weeks: [Week] {
-            let firstWeek = year.week(for: firstDay)
-
             var i = 0
             var weeks = weeks { _ in
                 defer { i += 1 }
