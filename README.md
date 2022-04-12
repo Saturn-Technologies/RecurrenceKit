@@ -1,3 +1,3 @@
-# RRule
+# RecurrenceKit
 
-A description of this package.
+## RRules for iOS
