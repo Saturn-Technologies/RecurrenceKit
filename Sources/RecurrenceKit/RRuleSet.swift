@@ -7,10 +7,10 @@
 
 import Foundation
 
-struct RRuleSet {
+public struct RRuleSet {
 
-    let start: DTStart
-    let rule: RRule
+    public let start: DTStart
+    public let rule: RRule
 
     enum Property: String, CaseIterable {
         case dtstart = "DTSTART"
@@ -18,12 +18,12 @@ struct RRuleSet {
         case exrule = "EXRULE"
     }
 
-    init(start: DTStart, rule: RRule) {
+    public init(start: DTStart, rule: RRule) {
         self.start = start
         self.rule = rule
     }
 
-    init(rfcString: String) throws {
+    public init(rfcString: String) throws {
         let options = try [Option](rfcString: rfcString)
 
         let start = options.compactMap { $0 as? DTStart }.first
@@ -33,7 +33,7 @@ struct RRuleSet {
         self.rule = rule!
     }
 
-    var serialized: String {
+    public var serialized: String {
         start.serialized + "\n" + rule.serialized
     }
 

@@ -38,12 +38,12 @@ public struct RRule: Option {
         return attributes
     }
 
-    var dtStart: DTStart?
-    var weekStart = Weekday.monday
-    var frequency: Frequency?
-    var interval: Int = 1
-    var count: Int?
-    var until: DateComponents?
+    public var dtStart: DTStart?
+    public var weekStart = Weekday.monday
+    public var frequency: Frequency?
+    public var interval: Int = 1
+    public var count: Int?
+    public var until: DateComponents?
 
     var bymonth: [Units.Month.Name]?
     var byweekno: [Int]?
@@ -238,7 +238,16 @@ public struct RRule: Option {
 //            self._original_rule['byweekday'] = None
     }
 
-    init(rfcString: String) throws {
+    public var byWeekday: Set<Weekday>? {
+        guard let byWeekday = byweekday,
+              !byWeekday.isEmpty else {
+            return nil
+        }
+
+        return Set(byWeekday)
+    }
+
+    public init(rfcString: String) throws {
         let headerRegex = RRule.headerRegex
         let attributes = try rfcString
             .replacingOccurrences(of: headerRegex, with: "")
