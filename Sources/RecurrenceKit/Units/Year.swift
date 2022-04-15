@@ -77,7 +77,7 @@ public extension Units {
                 throw RRuleError.bailedAfterGoingTooFarIntoTheFuture
             }
 
-            guard continueUntilDate > .now else {
+            guard continueUntilDate > Date() else {
                 throw RRuleError.bailedAfterGoingTooLong
             }
 
@@ -98,7 +98,7 @@ public extension Units {
             calendar: Calendar,
             predecessor: Year? = nil,
             continuingThroughYear: Int = 2500,
-            continuingUntilDeviceDate: Date = .now + 20
+            continuingUntilDeviceDate: Date = Date() + 20
         ) throws {
             precondition(calendar.firstWeekday == weekStart.intValue + 1)
 
