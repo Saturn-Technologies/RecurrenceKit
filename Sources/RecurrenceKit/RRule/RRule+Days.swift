@@ -1,6 +1,6 @@
 //
 //  RRule+Days.swift
-//
+//  RecurrenceKit
 //
 //  Created by Gregory Fajen on 3/5/22.
 //

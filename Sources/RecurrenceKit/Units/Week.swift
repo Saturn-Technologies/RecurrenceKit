@@ -1,6 +1,6 @@
 //
-//  File.swift
-//
+//  Week.swift
+//  RecurrenceKit
 //
 //  Created by Gregory Fajen on 3/6/22.
 //
@@ -16,10 +16,10 @@ public extension Units {
 
         var calendar: Calendar { year.calendar }
 
-        init(_ year: Year, week: Int) {
+        init(_ year: Year, week: Int) throws {
             var week = week
             if week < 0 {
-                week += year.numberOfWeeks + 1
+                week += try year.numberOfWeeks + 1
             }
 
             self.year = year
@@ -27,15 +27,19 @@ public extension Units {
         }
 
         var nextWeek: Week {
-            if isLastWeekOfYear {
-                return year.nextYear.firstWeek
-            } else {
-                return Week(year, week: week + 1)
+            get throws {
+                if try isLastWeekOfYear {
+                    return try year.nextYear.firstWeek
+                } else {
+                    return try Week(year, week: week + 1)
+                }
             }
         }
 
         var startOfWeek: Day {
-            year.firstDay(of: week)
+            get throws {
+                try year.firstDay(of: week)
+            }
         }
 
         var ordinalityOfFirstDay: Int {
@@ -43,26 +47,38 @@ public extension Units {
         }
 
         var isLastWeekOfYear: Bool {
-            week == year.numberOfWeeks
-        }
-
-        var isValid: Bool {
-            week > 0 && week <= year.numberOfWeeks
-        }
-
-        var days: [Units.Day] {
-            guard isValid else { return [] }
-
-            var day = startOfWeek
-            precondition(day.isValid)
-
-            return (0 ..< 7).map { _ in
-                defer { day = day.nextDay }
-                return day
+            get throws {
+                try week == year.numberOfWeeks
             }
         }
 
-        func day(for weekday: Weekday) -> Day {
+        var isValid: Bool {
+            do {
+                return try week > 0 && week <= year.numberOfWeeks
+            } catch {
+                return false
+            }
+        }
+
+        var days: [Units.Day] {
+//            get throws {
+            do {
+                guard isValid else { return [] }
+
+                var day = try startOfWeek
+                precondition(day.isValid)
+
+                return try (0 ..< 7).map { _ in
+                    let thisDay = day
+                    day = try day.nextDay
+                    return thisDay
+                }
+            } catch {
+                return []
+            }
+        }
+
+        func day(for weekday: Weekday) throws -> Day {
             days.first { $0.weekday == weekday }!
         }
 
@@ -80,6 +96,8 @@ extension Units {
         var week: Week
         let interval: Int
 
+        var error: Error?
+
         init(_ week: Week, interval: Int) {
             year = week.year
 
@@ -88,20 +106,27 @@ extension Units {
         }
 
         mutating func next() -> Week? {
+            print("WeekSequence.next()")
+            if error != nil { return nil }
+
             defer { increment() }
             return week
         }
 
         mutating func increment() {
-            for _ in 1 ... interval {
-                incrementOnce()
+            do {
+                for _ in 1 ... interval {
+                    try incrementOnce()
+                }
+            } catch {
+                self.error = error
             }
         }
 
-        mutating func incrementOnce() {
-            if week.isLastWeekOfYear {
-                year = year.nextYear
-                week = year.firstWeek
+        mutating func incrementOnce() throws {
+            if try week.isLastWeekOfYear {
+                year = try year.nextYear
+                week = try year.firstWeek
             } else {
                 week.week += 1
             }

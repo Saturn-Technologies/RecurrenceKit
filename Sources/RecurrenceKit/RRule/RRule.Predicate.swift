@@ -1,6 +1,6 @@
 //
-//  File 2.swift
-//
+//  RRule.Predicate.swift
+//  RecurrenceKit
 //
 //  Created by Gregory Fajen on 3/5/22.
 //

@@ -1,6 +1,6 @@
 //
 //  Sequence+Extensions.swift
-//  RRules
+//  RecurrenceKit
 //
 //  Created by Gregory Fajen on 4/12/22.
 //

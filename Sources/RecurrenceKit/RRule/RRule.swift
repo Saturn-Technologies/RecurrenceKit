@@ -1,42 +1,13 @@
+//
+//  RRule.swift
+//  RecurrenceKit
+//
+//  Created by Gregory Fajen on 3/5/22.
+//
+
 import Foundation
 
 public struct RRule: Option {
-
-//    let attributes: [Attribute]
-
-    var attributes: [Attribute] {
-        var attributes = [Attribute]()
-
-        if let dtStart = dtStart {
-            attributes.append(.dtStart(dtStart))
-        }
-
-        if weekStart != .monday {
-            attributes.append(.weekStart(weekStart))
-        }
-
-        if let frequency = frequency {
-            attributes.append(.frequency(frequency))
-        }
-
-        if interval != 1 {
-            attributes.append(.interval(interval))
-        }
-
-        if let count = count {
-            attributes.append(.count(count))
-        }
-
-        if let until = until {
-            attributes.append(.until(until))
-        }
-
-        if let byWeekday = byweekday {
-            attributes.append(.byday(byWeekday))
-        }
-
-        return attributes
-    }
 
     public var dtStart: DTStart?
     public var weekStart = Weekday.monday
@@ -58,20 +29,22 @@ public struct RRule: Option {
     var byminute: [Int]?
     var bysecond: [Int]?
 
-    public init(starting dtStart: DTStart,
-                frequency: Frequency? = nil,
-                interval: Int = 1,
-                byMonth: [Units.Month.Name]? = nil,
-                byDayOfMonth: [Int]? = nil,
-                byWeekday: [Weekday]? = nil,
-                byNWeekday: [NWeekday]? = nil,
-                byYearDay: [Int]? = nil,
-                byWeekNo: [Int]? = nil,
-                byHour: [Int]? = nil,
-                byMinute: [Int]? = nil,
-                bySecond: [Int]? = nil,
-                count: Int? = nil,
-                until: DateComponents? = nil) {
+    public init(
+        starting dtStart: DTStart,
+        frequency: Frequency? = nil,
+        interval: Int = 1,
+        byMonth: [Units.Month.Name]? = nil,
+        byDayOfMonth: [Int]? = nil,
+        byWeekday: [Weekday]? = nil,
+        byNWeekday: [NWeekday]? = nil,
+        byYearDay: [Int]? = nil,
+        byWeekNo: [Int]? = nil,
+        byHour: [Int]? = nil,
+        byMinute: [Int]? = nil,
+        bySecond: [Int]? = nil,
+        count: Int? = nil,
+        until: DateComponents? = nil
+    ) {
         self.dtStart = dtStart
         self.frequency = frequency
         self.interval = interval
@@ -113,34 +86,38 @@ public struct RRule: Option {
         }
     }
 
-    public init(starting components: DateComponents,
-                frequency: Frequency? = nil,
-                interval: Int = 1,
-                byMonth: [Units.Month.Name]? = nil,
-                byDayOfMonth: [Int]? = nil,
-                byWeekday: [Weekday]? = nil,
-                byNWeekday: [NWeekday]? = nil,
-                byYearDay: [Int]? = nil,
-                byWeekNo: [Int]? = nil,
-                byHour: [Int]? = nil,
-                byMinute: [Int]? = nil,
-                bySecond: [Int]? = nil,
-                count: Int? = nil,
-                until: DateComponents? = nil) {
-        self.init(starting: DTStart(components: components),
-                  frequency: frequency,
-                  interval: interval,
-                  byMonth: byMonth,
-                  byDayOfMonth: byDayOfMonth,
-                  byWeekday: byWeekday,
-                  byNWeekday: byNWeekday,
-                  byYearDay: byYearDay,
-                  byWeekNo: byWeekNo,
-                  byHour: byHour,
-                  byMinute: byMinute,
-                  bySecond: bySecond,
-                  count: count,
-                  until: until)
+    public init(
+        starting components: DateComponents,
+        frequency: Frequency? = nil,
+        interval: Int = 1,
+        byMonth: [Units.Month.Name]? = nil,
+        byDayOfMonth: [Int]? = nil,
+        byWeekday: [Weekday]? = nil,
+        byNWeekday: [NWeekday]? = nil,
+        byYearDay: [Int]? = nil,
+        byWeekNo: [Int]? = nil,
+        byHour: [Int]? = nil,
+        byMinute: [Int]? = nil,
+        bySecond: [Int]? = nil,
+        count: Int? = nil,
+        until: DateComponents? = nil
+    ) {
+        self.init(
+            starting: DTStart(components: components),
+            frequency: frequency,
+            interval: interval,
+            byMonth: byMonth,
+            byDayOfMonth: byDayOfMonth,
+            byWeekday: byWeekday,
+            byNWeekday: byNWeekday,
+            byYearDay: byYearDay,
+            byWeekNo: byWeekNo,
+            byHour: byHour,
+            byMinute: byMinute,
+            bySecond: bySecond,
+            count: count,
+            until: until
+        )
     }
 
     init(_ attributes: Attribute...) {

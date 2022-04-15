@@ -1,6 +1,6 @@
 //
-//  File.swift
-//
+//  Time.swift
+//  RecurrenceKit
 //
 //  Created by Gregory Fajen on 3/6/22.
 //

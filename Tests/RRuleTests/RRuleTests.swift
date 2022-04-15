@@ -9,28 +9,38 @@ final class RRuleTests: XCTestCase {
     }
 
     func testYearly() {
-        let set = RRuleSet(start: DTStart(components: datetime(1997, 9, 2, 9, 0)),
-                           rule: RRule(.frequency(.yearly),
-                                       .count(3)))
+        let set = RRuleSet(
+            start: DTStart(components: datetime(1997, 9, 2, 9, 0)),
+            rule: RRule(
+                .frequency(.yearly),
+                .count(3)
+            )
+        )
 
-        assertRuleSet(set, expandsTo: [datetime(1997, 9, 2, 9, 0),
-                                       datetime(1998, 9, 2, 9, 0),
-                                       datetime(1999, 9, 2, 9, 0)])
+        assertRuleSet(set, expandsTo: [
+            datetime(1997, 9, 2, 9, 0),
+            datetime(1998, 9, 2, 9, 0),
+            datetime(1999, 9, 2, 9, 0)
+        ])
     }
 
     func testParseDate() throws {
         let date = try DateComponents(rfcString: "19970105")
-        XCTAssertEqual(date, DateComponents(year: 1997,
-                                            month: 1,
-                                            day: 5))
+        XCTAssertEqual(date, DateComponents(
+            year: 1997,
+            month: 1,
+            day: 5
+        ))
 
         let withTime = try DateComponents(rfcString: "19970105T083000")
-        XCTAssertEqual(withTime, DateComponents(year: 1997,
-                                                month: 1,
-                                                day: 5,
-                                                hour: 8,
-                                                minute: 30,
-                                                second: 0))
+        XCTAssertEqual(withTime, DateComponents(
+            year: 1997,
+            month: 1,
+            day: 5,
+            hour: 8,
+            minute: 30,
+            second: 0
+        ))
     }
 
     func testParseDTStart() throws {
@@ -59,4 +69,5 @@ final class RRuleTests: XCTestCase {
         RRULE:FREQ=YEARLY;WKST=TU;INTERVAL=2;BYMONTH=1;BYDAY=SU;BYHOUR=8,9;BYMINUTE=30
         """)
     }
+
 }

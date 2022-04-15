@@ -1,21 +1,21 @@
 //
 //  RRule+Enumeration.swift
-//  RRules
+//  RecurrenceKit
 //
 //  Created by Gregory Fajen on 4/12/22.
 //
 
 import Foundation
 
- extension RRule {
+extension RRule {
 
-    func dateComponents() -> AnySequence<DateComponents> {
+    func dateComponents() throws -> AnySequence<DateComponents> {
         guard let dtStart = dtStart else { return [].eraseToAnySequence() }
         let (_, _, _, hour, minute, second) = dtStart.tuple
-        let start = initialYear.day(for: dtStart)
+        let start = try initialYear.day(for: dtStart)
         let startTime = Units.Time(hour: hour, minute: minute, second: second)
 
-        return daySequence
+        return try daySequence
             .combining(timeSequence)
             .lazy
             .compactMap { day, time -> DateComponents? in
@@ -33,10 +33,10 @@ import Foundation
             .eraseToAnySequence()
     }
 
-    public func dates(in range: Range<Date>) -> AnySequence<Date> {
+    public func dates(in range: Range<Date>) throws -> AnySequence<Date> {
         guard let calendar = dtStart?.calendar else { return [].eraseToAnySequence() }
 
-        return dateComponents()
+        return try dateComponents()
             .lazy
             .compactMap(calendar.date)
             .filter(range.contains)

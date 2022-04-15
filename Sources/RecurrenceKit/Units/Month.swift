@@ -1,6 +1,6 @@
 //
-//  File.swift
-//
+//  Month.swift
+//  RecurrenceKit
 //
 //  Created by Gregory Fajen on 3/6/22.
 //
@@ -50,15 +50,17 @@ public extension Units {
         }
 
         var nextMonth: Month {
-            if month == .december {
-                return year.nextYear.firstMonth
-            } else {
-                return Month(year: year, month: month + 1)
+            get throws {
+                if month == .december {
+                    return try year.nextYear.firstMonth
+                } else {
+                    return Month(year: year, month: month + 1)
+                }
             }
         }
 
-        private func weeks(while predicate: (Week) -> Bool) -> [Week] {
-            var week = year.week(for: firstDay)
+        private func weeks(while predicate: (Week) -> Bool) throws -> [Week] {
+            var week = try year.week(for: firstDay)
             var weeks = [Week]()
 
             while true {
@@ -67,22 +69,24 @@ public extension Units {
                 }
 
                 weeks.append(week)
-                week = week.nextWeek
+                week = try week.nextWeek
             }
         }
 
         var weeks: [Week] {
-            var i = 0
-            var weeks = weeks { _ in
-                defer { i += 1 }
-                return i < 7
-            }
+            get throws {
+                var i = 0
+                var weeks = try weeks { _ in
+                    defer { i += 1 }
+                    return i < 7
+                }
 
-            weeks = weeks.filter { week in
-                week.days.contains { $0.month == self }
-            }
+                weeks = weeks.filter { week in
+                    week.days.contains { $0.month == self }
+                }
 
-            return weeks
+                return weeks
+            }
         }
 
     }
@@ -128,6 +132,7 @@ extension Units {
 
         var month: Units.Month
         let interval: Int
+        var error: Error?
 
         typealias Element = Units.Month
 
@@ -137,19 +142,25 @@ extension Units {
         }
 
         mutating func next() -> Units.Month? {
+            if error != nil { return nil }
+
             defer { increment() }
             return month
         }
 
         mutating func increment() {
-            for _ in 1 ... interval {
-                incrementOnce()
+            do {
+                for _ in 1 ... interval {
+                    try incrementOnce()
+                }
+            } catch {
+                self.error = error
             }
         }
 
-        mutating func incrementOnce() {
+        mutating func incrementOnce() throws {
             if month.month == .december {
-                month = month.year.nextYear.firstMonth
+                month = try month.year.nextYear.firstMonth
             } else {
                 month.month += 1
             }

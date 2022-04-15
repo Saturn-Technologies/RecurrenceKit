@@ -1,6 +1,6 @@
 //
 //  DTStart.swift
-//
+//  RecurrenceKit
 //
 //  Created by Gregory Fajen on 3/5/22.
 //
@@ -37,14 +37,18 @@ public struct DTStart: Option {
             calendar.timeZone = timeZone
         }
 
-        components = calendar.dateComponents([.timeZone,
-                                              .year,
-                                              .month,
-                                              .day,
-                                              .hour,
-                                              .minute,
-                                              .second],
-                                             from: date)
+        components = calendar.dateComponents(
+            [
+                .timeZone,
+                .year,
+                .month,
+                .day,
+                .hour,
+                .minute,
+                .second
+            ],
+            from: date
+        )
     }
 
     public var weekday: RRule.Weekday {

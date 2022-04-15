@@ -1,6 +1,6 @@
 //
 //  DateComponents+Extension.swift
-//
+//  RecurrenceKit
 //
 //  Created by Gregory Fajen on 3/5/22.
 //
@@ -30,18 +30,22 @@ extension DateComponents {
         if let hour = match.captureGroups[4],
            let minute = match.captureGroups[5],
            let second = match.captureGroups[6] {
-            self = DateComponents(timeZone: timeZone,
-                                  year: Int(year),
-                                  month: Int(month),
-                                  day: Int(day),
-                                  hour: Int(hour),
-                                  minute: Int(minute),
-                                  second: Int(second))
+            self = DateComponents(
+                timeZone: timeZone,
+                year: Int(year),
+                month: Int(month),
+                day: Int(day),
+                hour: Int(hour),
+                minute: Int(minute),
+                second: Int(second)
+            )
         } else {
-            self = DateComponents(timeZone: timeZone,
-                                  year: Int(year),
-                                  month: Int(month),
-                                  day: Int(day))
+            self = DateComponents(
+                timeZone: timeZone,
+                year: Int(year),
+                month: Int(month),
+                day: Int(day)
+            )
         }
     }
 

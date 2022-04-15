@@ -1,6 +1,6 @@
 //
 //  RRuleSet.swift
-//
+//  RecurrenceKit
 //
 //  Created by Gregory Fajen on 3/5/22.
 //
@@ -9,8 +9,8 @@ import Foundation
 
 public struct RRuleSet {
 
-    public let start: DTStart
-    public let rule: RRule
+    public private(set) var start: DTStart
+    public private(set) var rule: RRule
 
     enum Property: String, CaseIterable {
         case dtstart = "DTSTART"
@@ -21,6 +21,7 @@ public struct RRuleSet {
     public init(start: DTStart, rule: RRule) {
         self.start = start
         self.rule = rule
+        self.rule.dtStart = start
     }
 
     public init(rfcString: String) throws {
@@ -34,7 +35,10 @@ public struct RRuleSet {
     }
 
     public var serialized: String {
-        start.serialized + "\n" + rule.serialized
+        """
+        \(start.serialized)
+        \(rule.serialized)
+        """
     }
 
 }

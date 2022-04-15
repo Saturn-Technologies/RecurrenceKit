@@ -1,18 +1,18 @@
---swiftversion 5.4
+--swiftversion 5.6
 
---exclude Pods, vendor, Package.swift
+--exclude Pods, vendor
 
---disable blankLinesAtStartOfScope, blankLinesAtEndOfScope, wrapMultilineStatementBraces
+--disable blankLinesAtStartOfScope, blankLinesAtEndOfScope, wrapMultilineStatementBraces, redundantSelf
 
 --indent 4 
 --indentcase true
---xcodeindentation true
+--xcodeindentation false
 
 --commas inline
 
 --emptybraces spaced
 
---wraparguments after-first
---wrapparameters after-first
---wrapcollections preserve
- 
+--wraparguments before-first
+--wrapparameters before-first
+--wrapcollections before-first
+--closingparen balanced

@@ -1,6 +1,6 @@
 //
-//  File.swift
-//
+//  Day.swift
+//  RecurrenceKit
 //
 //  Created by Gregory Fajen on 3/6/22.
 //
@@ -26,10 +26,12 @@ public extension Units {
         }
 
         var nextDay: Day {
-            if isLastDayInMonth {
-                return Day(month: month.nextMonth, day: 1)
-            } else {
-                return Day(month: month, day: day + 1)
+            get throws {
+                if isLastDayInMonth {
+                    return try Day(month: month.nextMonth, day: 1)
+                } else {
+                    return Day(month: month, day: day + 1)
+                }
             }
         }
 
@@ -78,6 +80,7 @@ extension Units {
         var month: Units.Month
         var day: Units.Day
         let interval: Int
+        var error: Error?
 
         typealias Element = Day
 
@@ -89,6 +92,8 @@ extension Units {
         }
 
         mutating func next() -> Day? {
+            if error != nil { return nil }
+
             defer { increment() }
             return day
         }
@@ -97,20 +102,24 @@ extension Units {
             day.day += interval
             if day.day < 28 { return }
 
-            var daysInMonth = month.numberOfDays
-            while day.day > daysInMonth {
-                day.day -= daysInMonth
+            do {
+                var daysInMonth = month.numberOfDays
+                while day.day > daysInMonth {
+                    day.day -= daysInMonth
 
-                if month.month == .december {
-                    year = year.nextYear
-                    month = year.firstMonth
-                    day.month = month
-                } else {
-                    month.month = month.month + 1
-                    day.month = month
+                    if month.month == .december {
+                        year = try year.nextYear
+                        month = year.firstMonth
+                        day.month = month
+                    } else {
+                        month.month = month.month + 1
+                        day.month = month
+                    }
+
+                    daysInMonth = month.numberOfDays
                 }
-
-                daysInMonth = month.numberOfDays
+            } catch {
+                self.error = error
             }
         }
 
@@ -121,22 +130,28 @@ extension Units {
 extension Units.Day {
 
     var components: DateComponents {
-        DateComponents(year: year.year,
-                       month: month.month.rawValue,
-                       day: day)
+        DateComponents(
+            year: year.year,
+            month: month.month.rawValue,
+            day: day
+        )
     }
 
-    func components(with hour: Int,
-                    _ minute: Int,
-                    _ second: Int,
-                    timeZone: TimeZone? = nil) -> DateComponents {
-        DateComponents(timeZone: timeZone,
-                       year: year.year,
-                       month: month.month.rawValue,
-                       day: day,
-                       hour: hour,
-                       minute: minute,
-                       second: second)
+    func components(
+        with hour: Int,
+        _ minute: Int,
+        _ second: Int,
+        timeZone: TimeZone? = nil
+    ) -> DateComponents {
+        DateComponents(
+            timeZone: timeZone,
+            year: year.year,
+            month: month.month.rawValue,
+            day: day,
+            hour: hour,
+            minute: minute,
+            second: second
+        )
     }
 
 }

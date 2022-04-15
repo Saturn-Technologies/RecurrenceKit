@@ -1,6 +1,6 @@
 //
-//  File.swift
-//
+//  RRule.Attribute.swift
+//  RecurrenceKit
 //
 //  Created by Gregory Fajen on 3/5/22.
 //
@@ -8,6 +8,40 @@
 import Foundation
 
 extension RRule {
+
+    var attributes: [Attribute] {
+        var attributes = [Attribute]()
+
+        if let dtStart = dtStart {
+            attributes.append(.dtStart(dtStart))
+        }
+
+        if weekStart != .monday {
+            attributes.append(.weekStart(weekStart))
+        }
+
+        if let frequency = frequency {
+            attributes.append(.frequency(frequency))
+        }
+
+        if interval != 1 {
+            attributes.append(.interval(interval))
+        }
+
+        if let count = count {
+            attributes.append(.count(count))
+        }
+
+        if let until = until {
+            attributes.append(.until(until))
+        }
+
+        if let byWeekday = byweekday {
+            attributes.append(.byday(byWeekday))
+        }
+
+        return attributes
+    }
 
     enum Attribute {
         case dtStart(DTStart)
