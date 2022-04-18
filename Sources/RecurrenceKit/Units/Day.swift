@@ -26,12 +26,10 @@ public extension Units {
         }
 
         var nextDay: Day {
-            get throws {
-                if isLastDayInMonth {
-                    return try Day(month: month.nextMonth, day: 1)
-                } else {
-                    return Day(month: month, day: day + 1)
-                }
+            if isLastDayInMonth {
+                return Day(month: month.nextMonth, day: 1)
+            } else {
+                return Day(month: month, day: day + 1)
             }
         }
 
@@ -76,23 +74,30 @@ extension Units {
 
     struct DaySequence: Sequence, IteratorProtocol {
 
-        var year: Units.Year
-        var month: Units.Month
+        let context: EnumerationContext
+
         var day: Units.Day
         let interval: Int
-        var error: Error?
+
+        var year: Units.Year { month.year }
+        var month: Units.Month { day.month }
 
         typealias Element = Day
 
-        init(_ day: Day, interval: Int) {
+        init(
+            _ day: Day,
+            interval: Int,
+            context: EnumerationContext
+        ) {
+            self.context = context
             self.day = day
-            month = day.month
-            year = month.year
             self.interval = interval
         }
 
         mutating func next() -> Day? {
-            if error != nil { return nil }
+            guard context.shouldContinue(for: year) else {
+                return nil
+            }
 
             defer { increment() }
             return day
@@ -102,24 +107,11 @@ extension Units {
             day.day += interval
             if day.day < 28 { return }
 
-            do {
-                var daysInMonth = month.numberOfDays
-                while day.day > daysInMonth {
-                    day.day -= daysInMonth
-
-                    if month.month == .december {
-                        year = try year.nextYear
-                        month = year.firstMonth
-                        day.month = month
-                    } else {
-                        month.month = month.month + 1
-                        day.month = month
-                    }
-
-                    daysInMonth = month.numberOfDays
-                }
-            } catch {
-                self.error = error
+            var daysInMonth = month.numberOfDays
+            while day.day > daysInMonth {
+                day.day -= daysInMonth
+                day.month = day.month.nextMonth
+                daysInMonth = month.numberOfDays
             }
         }
 

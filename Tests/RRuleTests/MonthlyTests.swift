@@ -38,15 +38,16 @@ extension RRuleTester {
         testName _: String = #function,
         line _: UInt = #line
     ) {
-        let result = try! rrule
-            .dateComponents()
+        let context = EnumerationContext()
+        let result = rrule
+            .dateComponents(with: context)
             .asArray
 
         if result == expectation {
             return
         }
 
-        let year = try! rrule.initialYear
+        let year = rrule.initialYear
         let calendar = year.calendar
 
         let date = calendar.date(from: result.first!)!
@@ -55,7 +56,7 @@ extension RRuleTester {
         print(formatter.string(from: date))
 
         let r2 = result.map { components in
-            try! year.day(for: components)
+            year.day(for: components)
         }
         for r in r2 {
             print(r)

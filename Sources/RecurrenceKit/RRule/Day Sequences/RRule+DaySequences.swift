@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import SwiftUI
+import WebKit
 
 extension RRule {
 
@@ -14,102 +16,110 @@ extension RRule {
     }
 
     var initialYear: Units.Year {
-        get throws {
-            guard let dtStart = dtStart else { fatalError() }
+        guard let dtStart = dtStart else { fatalError() }
 
-            var calendar = Calendar(identifier: .gregorian)
-            calendar.firstWeekday = weekStart.intValue + 1
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.firstWeekday = weekStart.intValue + 1
 
-            if let timeZone = dtStart.timeZone {
-                calendar.timeZone = timeZone
-            }
-
-            return try Units.Year(
-                year: dtStart.year,
-                weekStart: weekStart,
-                calendar: calendar
-            )
+        if let timeZone = dtStart.timeZone {
+            calendar.timeZone = timeZone
         }
+
+        return Units.Year(
+            year: dtStart.year,
+            weekStart: weekStart,
+            calendar: calendar
+        )
     }
 
-    var daySequence: AnySequence<Units.Day> {
-        get throws {
-            switch frequency {
-                case .yearly:
-                    if bymonth != nil, bynweekday != nil {
-                        fallthrough
-                    }
-                    return try yearlyDaySequence
+    func daySequence(with context: EnumerationContext) -> AnySequence<Units.Day> {
 
-                case .monthly:
-                    return try monthlyDaySequence
-
-                default:
-                    break
-            }
-
-            let months = bymonth ?? Units.Month.Name.allCases
-            let days = bymonthday ?? Array(1 ... 31)
-
-            if bynweekday != nil {
-                if bymonth != nil {
-                    return try monthlyDaySequence
-                } else {
-                    return try monthlyDaySequence
+        switch frequency {
+            case .yearly:
+                if bymonth != nil, bynweekday != nil {
+                    fallthrough
                 }
+                return yearlyDaySequence(with: context)
+
+            case .monthly:
+                return monthlyDaySequence(with: context)
+
+            default:
+                break
+        }
+
+        let months = bymonth ?? Units.Month.Name.allCases
+        let days = bymonthday ?? Array(1 ... 31)
+
+        if bynweekday != nil {
+            if bymonth != nil {
+                return monthlyDaySequence(with: context)
+            } else {
+                return monthlyDaySequence(with: context)
             }
+        }
 
-            switch frequency {
-                case .yearly:
-                    fatalError()
+        switch frequency {
+            case .yearly:
+                fatalError()
 
-                case .monthly:
-                    fatalError()
+            case .monthly:
+                fatalError()
 
-                case .weekly:
-                    let dtStart = dtStart!
-                    let year = try initialYear
-                    let week = try year.week(for: dtStart)
+            case .weekly:
+                let dtStart = dtStart!
+                let year = initialYear
+                let week = year.week(for: dtStart)
 
-                    let s = Units.WeekSequence(week, interval: interval(for: .weekly))
+                let s = Units.WeekSequence(
+                    week,
+                    interval: interval(for: .weekly),
+                    context: context
+                )
+                .lazy
+                .flatMap(\.days)
+                return process(daySequence: s)
+
+            case .daily:
+                if interval == 1 {
+                    fallthrough
+                } else {
+                    let start = initialYear.day(for: dtStart!)
+                    let s = Units.DaySequence(
+                        start,
+                        interval: interval(for: .daily),
+                        context: context
+                    )
+                    return process(daySequence: s)
+                }
+
+            default:
+                let s = Units.YearSequence(
+                    initialYear,
+                    interval: interval(for: .yearly),
+                    context: context
+                )
+                .lazy
+                .flatMap { year in
+                    months
+                        .combining(days)
                         .lazy
-                        .flatMap(\.days)
-                    return try process(daySequence: s)
-
-                case .daily:
-                    if interval == 1 {
-                        fallthrough
-                    } else {
-                        let start = try initialYear.day(for: dtStart!)
-                        let s = Units.DaySequence(start, interval: interval(for: .daily))
-                        return try process(daySequence: s)
-                    }
-
-                default:
-                    let s = try Units.YearSequence(initialYear, interval: interval(for: .yearly))
-                        .lazy
-                        .flatMap { year in
-                            months
-                                .combining(days)
-                                .lazy
-                                .map { month, day in
-                                    year.month(for: month).day(day)
-                                }
+                        .map { month, day in
+                            year.month(for: month).day(day)
                         }
-                    return try process(daySequence: s)
-            }
+                }
+                return process(daySequence: s)
         }
     }
 
-    func process<S>(daySequence: S) throws -> AnySequence<Units.Day> where S: Sequence, S.Element == Units.Day {
+    func process<S>(daySequence: S) -> AnySequence<Units.Day> where S: Sequence, S.Element == Units.Day {
         let predicates = predicates
-        let start = try initialYear.day(for: dtStart!)
+        let start = initialYear.day(for: dtStart!)
 
         return daySequence
             .lazy
             .filter { day in
-                print("    checking \(day)")
-                return day.isValid(for: start) && predicates.allSatisfy { predicate in
+                day.isValid(for: start) && predicates.allSatisfy { predicate in
                     predicate.isSatisfied(by: day)
                 }
             }
@@ -122,26 +132,25 @@ extension RRule {
 
 extension RRule {
 
-    private typealias YearToDayTransform = (Units.Year) throws -> Units.Day
+    private typealias YearToDayTransform = (Units.Year) -> Units.Day
     private typealias YearToDaysTransform = (Units.Year) -> [Units.Day]
 
-    var yearlyDaySequence: AnySequence<Units.Day> {
-        get throws {
-            let s = try Units.YearSequence(
-                initialYear,
-                interval: interval(for: .yearly)
-            )
-            .lazy
-            .flatMap(yearToDaysTransform)
+    func yearlyDaySequence(with context: EnumerationContext) -> AnySequence<Units.Day> {
+        let s = Units.YearSequence(
+            initialYear,
+            interval: interval(for: .yearly),
+            context: context
+        )
+        .lazy
+        .flatMap(yearToDaysTransform)
 
-            return try process(daySequence: s)
-        }
+        return process(daySequence: s)
     }
 
     private var yearToNWeekdayTransforms: [YearToDaysTransform] {
         bynweekday?.map { weekday in
             { year in
-                if let day = try? dayForNWeekday(weekday, year: year) {
+                if let day = dayForNWeekday(weekday, year: year) {
                     return [day]
                 } else {
                     return []
@@ -177,11 +186,6 @@ extension RRule {
                     .lazy
                     .flatMap { $0(year) }
                     .sorted()
-                    .map { day in
-                        print(year)
-                        print(transforms)
-                        return day
-                    }
             }
         } else {
             let months = bymonth ?? Units.Month.Name.allCases
@@ -198,10 +202,10 @@ extension RRule {
         }
     }
 
-    private func dayForNWeekday(_ nWeekday: NWeekday, year: Units.Year) throws -> Units.Day? {
-        let candidates = try year
+    private func dayForNWeekday(_ nWeekday: NWeekday, year: Units.Year) -> Units.Day? {
+        let candidates = year
             .weeks
-            .map { try $0.day(for: nWeekday.weekday) }
+            .map { $0.day(for: nWeekday.weekday) }
             .filter { $0.isValid && $0.year == year }
 
         var i = nWeekday.n - 1
@@ -218,31 +222,27 @@ extension RRule {
 
     private func dayForYearDay(_ yearDay: Int, year: Units.Year) -> Units.Day {
         if yearDay > 0 {
-            return try! year.day(for: yearDay)
+            return year.day(for: yearDay)
         } else {
-            return try! year.day(for: year.numberOfDays + yearDay + 1)
+            return year.day(for: year.numberOfDays + yearDay + 1)
         }
     }
 
     private func daysForWeekNo(_ weekNo: Int, year: Units.Year) -> [Units.Day] {
-        do {
-            if try weekNo > year.numberOfWeeks { return [] }
+        if weekNo > year.numberOfWeeks { return [] }
 
-            let week = try Units.Week(year, week: weekNo)
-            var days = week.days
+        let week = Units.Week(year, week: weekNo)
+        var days = week.days
 
-            let old = try Units.Week(year.predecessor, week: weekNo)
-            days.append(contentsOf: old.days)
+        let old = Units.Week(year.predecessor, week: weekNo)
+        days.append(contentsOf: old.days)
 
-            let new = try Units.Week(year.nextYear, week: weekNo)
-            days.append(contentsOf: new.days)
+        let new = Units.Week(year.nextYear, week: weekNo)
+        days.append(contentsOf: new.days)
 
-            return days
-                .filter { $0.isValid && $0.year == year }
-                .sorted()
-        } catch {
-            return []
-        }
+        return days
+            .filter { $0.isValid && $0.year == year }
+            .sorted()
     }
 
 }
@@ -254,18 +254,17 @@ extension RRule {
     private typealias MonthToDayTransform = (Units.Month) -> Units.Day
     private typealias MonthToDaysTransform = (Units.Month) -> [Units.Day]
 
-    var monthlyDaySequence: AnySequence<Units.Day> {
-        get throws {
-            let month = try initialYear.month(for: dtStart!)
-            let s = Units.MonthSequence(
-                month,
-                interval: interval(for: .monthly)
-            )
-            .lazy
-            .flatMap(specialTransform)
+    func monthlyDaySequence(with context: EnumerationContext) -> AnySequence<Units.Day> {
+        let month = initialYear.month(for: dtStart!)
+        let s = Units.MonthSequence(
+            month,
+            interval: interval(for: .monthly),
+            context: context
+        )
+        .lazy
+        .flatMap(specialTransform)
 
-            return try process(daySequence: s)
-        }
+        return process(daySequence: s)
     }
 
     private var specialTransform: MonthToDaysTransform {
@@ -276,7 +275,7 @@ extension RRule {
         return { month in
             byNWeekday
                 .compactMap { weekday in
-                    try? dayForNWeekday(weekday, month: month)
+                    dayForNWeekday(weekday, month: month)
                 }
                 .sorted()
                 .map { day in
@@ -294,10 +293,10 @@ extension RRule {
         }
     }
 
-    private func dayForNWeekday(_ nWeekday: NWeekday, month: Units.Month) throws -> Units.Day? {
-        let candidates = try month
+    private func dayForNWeekday(_ nWeekday: NWeekday, month: Units.Month) -> Units.Day? {
+        let candidates = month
             .weeks
-            .map { try $0.day(for: nWeekday.weekday) }
+            .map { $0.day(for: nWeekday.weekday) }
             .filter { $0.isValid && $0.month == month }
 
         var i = nWeekday.n - 1
@@ -305,14 +304,10 @@ extension RRule {
             i += candidates.count + 1
         }
 
-        print("💡 dayForNWeekday(\(nWeekday), month: \(month.month) \(month.year.year)")
-
         guard i >= 0, i < candidates.count else {
-            print("     returning nil")
             return nil
         }
 
-        print("     returning \(candidates[i])")
         return candidates[i]
     }
 

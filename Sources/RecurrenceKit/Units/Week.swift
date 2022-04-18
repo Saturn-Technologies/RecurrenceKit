@@ -16,10 +16,10 @@ public extension Units {
 
         var calendar: Calendar { year.calendar }
 
-        init(_ year: Year, week: Int) throws {
+        init(_ year: Year, week: Int) {
             var week = week
             if week < 0 {
-                week += try year.numberOfWeeks + 1
+                week += year.numberOfWeeks + 1
             }
 
             self.year = year
@@ -27,19 +27,15 @@ public extension Units {
         }
 
         var nextWeek: Week {
-            get throws {
-                if try isLastWeekOfYear {
-                    return try year.nextYear.firstWeek
-                } else {
-                    return try Week(year, week: week + 1)
-                }
+            if isLastWeekOfYear {
+                return year.nextYear.firstWeek
+            } else {
+                return Week(year, week: week + 1)
             }
         }
 
         var startOfWeek: Day {
-            get throws {
-                try year.firstDay(of: week)
-            }
+            year.firstDay(of: week)
         }
 
         var ordinalityOfFirstDay: Int {
@@ -47,38 +43,27 @@ public extension Units {
         }
 
         var isLastWeekOfYear: Bool {
-            get throws {
-                try week == year.numberOfWeeks
-            }
+            week == year.numberOfWeeks
         }
 
         var isValid: Bool {
-            do {
-                return try week > 0 && week <= year.numberOfWeeks
-            } catch {
-                return false
-            }
+            week > 0 && week <= year.numberOfWeeks
         }
 
         var days: [Units.Day] {
-//            get throws {
-            do {
-                guard isValid else { return [] }
+            guard isValid else { return [] }
 
-                var day = try startOfWeek
-                precondition(day.isValid)
+            var day = startOfWeek
+            precondition(day.isValid)
 
-                return try (0 ..< 7).map { _ in
-                    let thisDay = day
-                    day = try day.nextDay
-                    return thisDay
-                }
-            } catch {
-                return []
+            return (0 ..< 7).map { _ in
+                let thisDay = day
+                day = day.nextDay
+                return thisDay
             }
         }
 
-        func day(for weekday: Weekday) throws -> Day {
+        func day(for weekday: Weekday) -> Day {
             days.first { $0.weekday == weekday }!
         }
 
@@ -90,6 +75,8 @@ extension Units {
 
     struct WeekSequence: Sequence, IteratorProtocol {
 
+        let context: EnumerationContext
+
         var year: Year
         var calendar: Calendar { year.calendar }
 
@@ -98,15 +85,22 @@ extension Units {
 
         var error: Error?
 
-        init(_ week: Week, interval: Int) {
+        init(
+            _ week: Week,
+            interval: Int,
+            context: EnumerationContext
+        ) {
+            self.context = context
             year = week.year
-
             self.week = week
             self.interval = interval
         }
 
         mutating func next() -> Week? {
-            print("WeekSequence.next()")
+            guard context.shouldContinue(for: week.year) else {
+                return nil
+            }
+
             if error != nil { return nil }
 
             defer { increment() }
@@ -114,19 +108,15 @@ extension Units {
         }
 
         mutating func increment() {
-            do {
-                for _ in 1 ... interval {
-                    try incrementOnce()
-                }
-            } catch {
-                self.error = error
+            for _ in 1 ... interval {
+                incrementOnce()
             }
         }
 
-        mutating func incrementOnce() throws {
-            if try week.isLastWeekOfYear {
-                year = try year.nextYear
-                week = try year.firstWeek
+        mutating func incrementOnce() {
+            if week.isLastWeekOfYear {
+                year = year.nextYear
+                week = year.firstWeek
             } else {
                 week.week += 1
             }

@@ -50,17 +50,15 @@ public extension Units {
         }
 
         var nextMonth: Month {
-            get throws {
-                if month == .december {
-                    return try year.nextYear.firstMonth
-                } else {
-                    return Month(year: year, month: month + 1)
-                }
+            if month == .december {
+                return year.nextYear.firstMonth
+            } else {
+                return Month(year: year, month: month + 1)
             }
         }
 
-        private func weeks(while predicate: (Week) -> Bool) throws -> [Week] {
-            var week = try year.week(for: firstDay)
+        private func weeks(while predicate: (Week) -> Bool) -> [Week] {
+            var week = year.week(for: firstDay)
             var weeks = [Week]()
 
             while true {
@@ -69,24 +67,22 @@ public extension Units {
                 }
 
                 weeks.append(week)
-                week = try week.nextWeek
+                week = week.nextWeek
             }
         }
 
         var weeks: [Week] {
-            get throws {
-                var i = 0
-                var weeks = try weeks { _ in
-                    defer { i += 1 }
-                    return i < 7
-                }
-
-                weeks = weeks.filter { week in
-                    week.days.contains { $0.month == self }
-                }
-
-                return weeks
+            var i = 0
+            var weeks = weeks { _ in
+                defer { i += 1 }
+                return i < 7
             }
+
+            weeks = weeks.filter { week in
+                week.days.contains { $0.month == self }
+            }
+
+            return weeks
         }
 
     }
@@ -130,40 +126,38 @@ extension Units {
 
     struct MonthSequence: Sequence, IteratorProtocol {
 
+        let context: EnumerationContext
+
         var month: Units.Month
         let interval: Int
-        var error: Error?
 
-        typealias Element = Units.Month
-
-        init(_ month: Units.Month, interval: Int) {
+        init(
+            _ month: Units.Month,
+            interval: Int,
+            context: EnumerationContext
+        ) {
+            self.context = context
             self.month = month
             self.interval = interval
         }
 
         mutating func next() -> Units.Month? {
-            if error != nil { return nil }
+            guard context.shouldContinue(for: month.year) else {
+                return nil
+            }
 
             defer { increment() }
             return month
         }
 
         mutating func increment() {
-            do {
-                for _ in 1 ... interval {
-                    try incrementOnce()
-                }
-            } catch {
-                self.error = error
+            for _ in 1 ... interval {
+                incrementOnce()
             }
         }
 
-        mutating func incrementOnce() throws {
-            if month.month == .december {
-                month = try month.year.nextYear.firstMonth
-            } else {
-                month.month += 1
-            }
+        mutating func incrementOnce() {
+            month = month.nextMonth
         }
 
     }

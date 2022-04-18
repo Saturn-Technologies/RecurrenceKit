@@ -9,13 +9,13 @@ import Foundation
 
 extension RRule {
 
-    func dateComponents() throws -> AnySequence<DateComponents> {
+    func dateComponents(with context: EnumerationContext) -> AnySequence<DateComponents> {
         guard let dtStart = dtStart else { return [].eraseToAnySequence() }
         let (_, _, _, hour, minute, second) = dtStart.tuple
-        let start = try initialYear.day(for: dtStart)
+        let start = initialYear.day(for: dtStart)
         let startTime = Units.Time(hour: hour, minute: minute, second: second)
 
-        return try daySequence
+        return daySequence(with: context)
             .combining(timeSequence)
             .lazy
             .compactMap { day, time -> DateComponents? in
@@ -33,10 +33,15 @@ extension RRule {
             .eraseToAnySequence()
     }
 
-    public func dates(in range: Range<Date>) throws -> AnySequence<Date> {
+    public func dates(in range: Range<Date>) -> AnySequence<Date> {
         guard let calendar = dtStart?.calendar else { return [].eraseToAnySequence() }
 
-        return try dateComponents()
+        let context = EnumerationContext(
+            through: range.upperBound,
+            in: calendar
+        )
+
+        return dateComponents(with: context)
             .lazy
             .compactMap(calendar.date)
             .filter(range.contains)
