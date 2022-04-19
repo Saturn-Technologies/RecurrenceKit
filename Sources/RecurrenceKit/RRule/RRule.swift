@@ -197,22 +197,6 @@ public struct RRule: Option {
                     break
             }
         }
-
-        ////        if bywee
-//            (byweekno is None and byyearday is None and bymonthday is None and
-//            byweekday is None and byeaster is None):
-//                if freq == YEARLY:
-//                if bymonth is None:
-//                bymonth = dtstart.month
-//            self._original_rule['bymonth'] = None
-//            bymonthday = dtstart.day
-//            self._original_rule['bymonthday'] = None
-//            elif freq == MONTHLY:
-//                bymonthday = dtstart.day
-//            self._original_rule['bymonthday'] = None
-//            elif freq == WEEKLY:
-//                byweekday = dtstart.weekday()
-//            self._original_rule['byweekday'] = None
     }
 
     public var byWeekday: Set<Weekday>? {
@@ -253,47 +237,23 @@ public struct RRule: Option {
 
 }
 
-/*
- function parseNumber (value: string) {
- if (value.indexOf(',') !== -1) {
- const values = value.split(',')
- return values.map(parseIndividualNumber)
- }
+extension RRule {
 
- return parseIndividualNumber(value)
- }
+    public var serialized: String {
+        "RRULE:" + attributes
+            .filter(shouldSerialize)
+            .map(\.serialized)
+            .joined(separator: ";")
+    }
 
- function parseIndividualNumber (value: string) {
- if (/^[+-]?\d+$/.test(value)) {
- return Number(value)
- }
+    func shouldSerialize(attribute: Attribute) -> Bool {
+        switch attribute {
+            case .dtStart:
+                return false
 
- return value
- }
-
- function parseWeekday (value: string) {
- const days = value.split(',')
-
- return days.map(day => {
- if (day.length === 2) {
- // MO, TU, ...
- return Days[day as keyof typeof Days] // wday instanceof Weekday
- }
-
- // -1MO, +3FR, 1SO, 13TU ...
- const parts = day.match(/^([+-]?\d{1,2})([A-Z]{2})$/)!
- const n = Number(parts[1])
- const wdaypart = parts[2] as keyof typeof Days
- const wday = Days[wdaypart].weekday
- return new Weekday(wday, n)
- })
- }
- */
-
-public extension RRule {
-
-    var serialized: String {
-        "RRULE:" + attributes.map(\.serialized).joined(separator: ";")
+            default:
+                return true
+        }
     }
 
 }
