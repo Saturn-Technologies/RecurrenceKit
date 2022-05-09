@@ -11,6 +11,12 @@ import Foundation
 
 public extension Units {
 
+    struct IntegerDay {
+        let year: Int
+        let month: Month.Name
+        let day: Int
+    }
+
     struct Day: Hashable, Comparable, CustomDebugStringConvertible {
 
         static var never: Day { fatalError() }
@@ -64,6 +70,12 @@ public extension Units {
             } else {
                 return lhs.month < rhs.month
             }
+        }
+
+        var integerDay: IntegerDay {
+            IntegerDay(year: year.year,
+                       month: month.month,
+                       day: day)
         }
 
     }

@@ -32,8 +32,11 @@ public extension Units {
             return predecessor
         }
 
-        private(set) var startOfFirstWeek: Day!
-        var ordinalityOfFirstDayInFirstWeek: Int
+        private(set) var ordinalityOfFirstDayInFirstWeek: Int
+        private var integerStartOfFirstWeek: IntegerDay!
+        var startOfFirstWeek: Day {
+            day(for: integerStartOfFirstWeek)
+        }
 
         private let numberOfDaysPerMonth: [Int]
         private let ordinalitiesForMonth: [Int]
@@ -116,9 +119,13 @@ public extension Units {
                 )
                 _predecessor = predecessor
 
-                startOfFirstWeek = predecessor.lastMonth.day(31 + ordinalityOfFirstDayInFirstWeek)
+                integerStartOfFirstWeek = predecessor.lastMonth
+                    .day(31 + ordinalityOfFirstDayInFirstWeek)
+                    .integerDay
             } else {
-                startOfFirstWeek = firstMonth.day(ordinalityOfFirstDayInFirstWeek)
+                integerStartOfFirstWeek = firstMonth
+                    .day(ordinalityOfFirstDayInFirstWeek)
+                    .integerDay
             }
         }
 
@@ -175,6 +182,18 @@ public extension Units {
             )
         }
 
+        private func year(for yearInt: Int) -> Year {
+            if yearInt < self.year {
+                return predecessor.year(for: yearInt)
+            }
+
+            if yearInt > self.year {
+                return nextYear.year(for: yearInt)
+            }
+
+            return self
+        }
+
         func calculateNumberOfWeeks() -> Int {
             let numberOfDaysInYear = isLeapYear ? 366 : 365
             let nextDay = nextYear.ordinalityOfFirstDayInFirstWeek + numberOfDaysInYear
@@ -217,6 +236,12 @@ public extension Units {
 
         func day(for yearDay: Int) -> Day {
             dayWithOrdinality(yearDay)
+        }
+
+        func day(for integerDay: IntegerDay) -> Day {
+            let year = year(for: integerDay.year)
+            let month = year.month(for: integerDay.month)
+            return month.day(integerDay.day)
         }
 
         func week(for dtStart: DTStart) -> Week {
