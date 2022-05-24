@@ -222,6 +222,29 @@ public struct RRule: Option {
         RRule(newAttributes + attributes)
     }
 
+    public func normalized() -> RRule {
+        guard let dtStart = dtStart else {
+            return self
+        }
+
+        return RRule(
+            starting: dtStart,
+            frequency: frequency,
+            interval: interval,
+            byMonth: bymonth,
+            byDayOfMonth: bymonthday,
+            byWeekday: byweekday,
+            byNWeekday: bynweekday,
+            byYearDay: byyearday,
+            byWeekNo: byweekno,
+            byHour: byhour,
+            byMinute: byminute,
+            bySecond: bysecond,
+            count: count,
+            until: until
+        )
+    }
+
     static let headerRegex = try! RegEx("^(?:RRULE|EXRULE):")
 
     var isByWeekNo: Bool {

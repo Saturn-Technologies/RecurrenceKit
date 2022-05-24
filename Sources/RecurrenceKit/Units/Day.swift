@@ -73,9 +73,11 @@ public extension Units {
         }
 
         var integerDay: IntegerDay {
-            IntegerDay(year: year.year,
-                       month: month.month,
-                       day: day)
+            IntegerDay(
+                year: year.year,
+                month: month.month,
+                day: day
+            )
         }
 
     }
