@@ -33,6 +33,7 @@ public struct RRuleSet {
         self.start = start!
         self.rule = rule!
         self.rule.dtStart = start
+        self.rule = self.rule.normalized()
     }
 
     public var serialized: String {
